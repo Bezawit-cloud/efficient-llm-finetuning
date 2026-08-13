@@ -145,7 +145,7 @@ def score_dataset(
     gamma = scoring_cfg.get("gamma", 0.334)
     emb_model = scoring_cfg.get("embedding_model", "all-MiniLM-L6-v2")
 
-    logger.info(f"Scoring {len(examples)} examples (α={alpha}, β={beta}, γ={gamma})")
+    logger.info(f"Scoring {len(examples)} examples (a={alpha}, b={beta}, g={gamma})")
 
     div_scores   = compute_diversity_scores(examples, emb_model)
     comp_scores  = compute_complexity_scores(examples)
