@@ -114,7 +114,7 @@ def main():
     seed     = config["seed"]
     set_seed(seed)
 
-    logger.info(f"═══ Experiment {exp_id}: {exp_name} | seed={seed} ═══")
+    logger.info(f"=== Experiment {exp_id}: {exp_name} | seed={seed} ===")
     logger.info(f"Config: {args.config}")
 
     # ── Load data ─────────────────────────────────────────────────────────────
@@ -235,10 +235,10 @@ def main():
 
     results_path = save_results(results, output_dir)
     logger.info(f"Results saved to {results_path}")
-    logger.info("─" * 60)
+    logger.info("-" * 60)
     for k, v in results.items():
         logger.info(f"  {k}: {v}")
-    logger.info("─" * 60)
+    logger.info("-" * 60)
 
 
 if __name__ == "__main__":
