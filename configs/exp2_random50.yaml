@@ -1,0 +1,18 @@
+# E2 — Random 50% subset, random order (no curriculum, no adaptive selection)
+# Run: python src/train_baseline.py --config configs/exp2_random50.yaml
+
+experiment:
+  id: "E2"
+  name: "random50_random_order"
+  description: "50% random subset, random order. Isolates the effect of data volume alone."
+
+data:
+  selection:
+    method: "random"
+    fraction: 0.50
+  ordering: "random"
+
+training:
+  output_dir: "outputs/E2_random50_random"
+
+seed: 42

@@ -1,0 +1,21 @@
+# Ablation A2 — complexity-only scoring (α=γ=0, β=1.0)
+experiment:
+  id: "A2"
+  name: "ablation_complexity_only"
+  description: "Top-50% selected by complexity score only. Ablates the contribution of the complexity component."
+
+scoring:
+  alpha: 0.0
+  beta:  1.0
+  gamma: 0.0
+
+data:
+  selection:
+    method: "adaptive"
+    fraction: 0.50
+  ordering: "random"
+
+training:
+  output_dir: "outputs/A2_complexity_only"
+
+seed: 42

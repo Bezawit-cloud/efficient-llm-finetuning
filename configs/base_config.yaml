@@ -1,0 +1,71 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Base configuration — shared by all experiments
+# Override per-experiment in configs/expN.yaml
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── Model ────────────────────────────────────────────────────────────────────
+model:
+  name: "Qwen/Qwen2.5-0.5B-Instruct"
+  fallback: "HuggingFaceTB/SmolLM2-360M-Instruct"
+  # Switch to fallback if single-run wall-clock > 20 min (measured on Day 1)
+  use_fallback: false
+
+# ── LoRA ─────────────────────────────────────────────────────────────────────
+lora:
+  r: 8
+  lora_alpha: 16
+  lora_dropout: 0.05
+  target_modules:
+    - "q_proj"
+    - "v_proj"
+    - "k_proj"
+    - "o_proj"
+    - "gate_proj"
+    - "up_proj"
+    - "down_proj"
+  bias: "none"
+  task_type: "CAUSAL_LM"
+
+# ── Data ─────────────────────────────────────────────────────────────────────
+data:
+  dataset_name: "tatsu-lab/alpaca"
+  max_samples: null          # null = use all 52k; set int for quick sanity runs
+  eval_split_ratio: 0.05     # 5% held-out eval from the training set
+  max_seq_length: 512
+  seed: 42
+
+# ── Scoring (α + β + γ = 1.0) ────────────────────────────────────────────────
+scoring:
+  alpha: 0.333   # diversity weight
+  beta:  0.333   # complexity weight
+  gamma: 0.334   # response-length quality proxy weight
+  embedding_model: "all-MiniLM-L6-v2"   # used for diversity embedding
+
+# ── Training ─────────────────────────────────────────────────────────────────
+training:
+  num_train_epochs: 3
+  per_device_train_batch_size: 4
+  per_device_eval_batch_size: 8
+  gradient_accumulation_steps: 4
+  learning_rate: 2.0e-4
+  lr_scheduler_type: "cosine"
+  warmup_ratio: 0.03
+  weight_decay: 0.001
+  fp16: false      # set true if CUDA GPU present
+  bf16: false      # set true if A100 / H100
+  optim: "adamw_torch"
+  save_strategy: "epoch"     # checkpoint every epoch — crash safety
+  eval_strategy: "epoch"
+  logging_steps: 50
+  output_dir: "outputs"
+  dataloader_num_workers: 0
+
+# ── Evaluation ───────────────────────────────────────────────────────────────
+evaluation:
+  eval_set_size: 200          # fixed eval set for LLM-judged win-rate
+  metrics:
+    - "eval_loss"
+    - "rouge_l"
+
+# ── Reproducibility ──────────────────────────────────────────────────────────
+seed: 42

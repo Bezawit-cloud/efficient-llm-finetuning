@@ -1,0 +1,18 @@
+# E4 — Adaptive 50% subset, easy→hard curriculum (FULL METHOD)
+# Run: python src/train_baseline.py --config configs/exp4_adaptive50_curriculum.yaml
+
+experiment:
+  id: "E4"
+  name: "adaptive50_curriculum"
+  description: "Top-50% by importance score, ordered easy→hard by complexity. Our proposed method."
+
+data:
+  selection:
+    method: "adaptive"
+    fraction: 0.50
+  ordering: "curriculum"     # easy→hard on complexity sub-score
+
+training:
+  output_dir: "outputs/E4_adaptive50_curriculum"
+
+seed: 42

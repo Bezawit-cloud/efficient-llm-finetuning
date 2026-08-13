@@ -1,0 +1,18 @@
+# E1 — Full Baseline (100% Alpaca, random order, no selection)
+# Run: python src/train_baseline.py --config configs/exp1_baseline.yaml
+
+experiment:
+  id: "E1"
+  name: "full_baseline"
+  description: "100% of Alpaca, random order, no data selection. All efficiency claims are relative to this run."
+
+data:
+  selection:
+    method: "full"           # use all data
+    fraction: 1.0
+  ordering: "random"         # no curriculum
+
+training:
+  output_dir: "outputs/E1_full_baseline"
+
+seed: 42

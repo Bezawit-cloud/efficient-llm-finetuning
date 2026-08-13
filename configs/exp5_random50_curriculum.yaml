@@ -1,0 +1,19 @@
+# E5 — Random 50% subset, easy→hard curriculum order
+# Run: python src/train_baseline.py --config configs/exp5_random50_curriculum.yaml
+# Purpose: isolates curriculum ordering from selection (E3 vs E5 shows ordering effect alone)
+
+experiment:
+  id: "E5"
+  name: "random50_curriculum"
+  description: "50% random subset, ordered easy→hard. Isolates curriculum effect from selection."
+
+data:
+  selection:
+    method: "random"
+    fraction: 0.50
+  ordering: "curriculum"
+
+training:
+  output_dir: "outputs/E5_random50_curriculum"
+
+seed: 42
