@@ -22,6 +22,9 @@ import sys
 import time
 from pathlib import Path
 
+# Set CUDA allocator configuration before any torch/CUDA calls
+os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
+
 # Make sure src/ is importable when running from repo root
 sys.path.insert(0, str(Path(__file__).parent.parent))
 

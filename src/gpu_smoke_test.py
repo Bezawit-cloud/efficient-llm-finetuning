@@ -16,6 +16,9 @@ import time
 import json
 from pathlib import Path
 
+# Set CUDA allocator configuration before any torch/CUDA calls
+os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
+
 # Ensure src/ is importable
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -53,6 +56,11 @@ def run_gpu_smoke_test():
     config = load_config("configs/exp1_baseline.yaml")
     set_seed(config.get("seed", 42))
     model_name = config["model"]["name"]
+    t_cfg = config.get("training", {})
+    max_seq_length = config["data"].get("max_seq_length", 512)
+    per_device_batch_size = t_cfg.get("per_device_train_batch_size", 8)
+    grad_accum_steps = t_cfg.get("gradient_accumulation_steps", 4)
+    grad_checkpointing = t_cfg.get("gradient_checkpointing", False)
 
     # 3. Tokenizer & Dummy Data Batch
     print(f"Loading Tokenizer:   {model_name} ...")
@@ -60,14 +68,15 @@ def run_gpu_smoke_test():
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
+    n_dummy = max(16, per_device_batch_size * grad_accum_steps)
     dummy_examples = [
         {"text": f"Below is an instruction that describes a task.\n\n### Instruction:\nWrite a haiku about test number {i}.\n\n### Response:\nCode compiles fast\nTensors flow through the GPU\nTests pass with great joy.{tokenizer.eos_token}"}
-        for i in range(16)
+        for i in range(n_dummy)
     ]
     raw_ds = Dataset.from_dict({"text": [d["text"] for d in dummy_examples]})
 
     def tokenize_fn(batch):
-        tok = tokenizer(batch["text"], max_length=512, truncation=True, padding=False)
+        tok = tokenizer(batch["text"], max_length=max_seq_length, truncation=True, padding=False)
         tok["labels"] = tok["input_ids"].copy()
         return tok
 
@@ -107,12 +116,13 @@ def run_gpu_smoke_test():
     training_args = TrainingArguments(
         output_dir=output_dir,
         max_steps=1,
-        per_device_train_batch_size=4,
-        gradient_accumulation_steps=4,
-        learning_rate=2e-4,
+        per_device_train_batch_size=per_device_batch_size,
+        gradient_accumulation_steps=grad_accum_steps,
+        gradient_checkpointing=grad_checkpointing,
+        learning_rate=t_cfg.get("learning_rate", 2e-4),
         fp16=use_fp16,
         bf16=use_bf16,
-        optim="adamw_torch",
+        optim=t_cfg.get("optim", "adamw_torch"),
         logging_steps=1,
         report_to="none",
         seed=42,
@@ -130,7 +140,7 @@ def run_gpu_smoke_test():
     if cuda_available:
         torch.cuda.reset_peak_memory_stats()
 
-    print("\nExecuting 1 Training Step (4 micro-batches of 4 samples = 16 samples) ...")
+    print(f"\nExecuting 1 Training Step ({grad_accum_steps} micro-batches of {per_device_batch_size} samples = {per_device_batch_size * grad_accum_steps} samples, checkpointing={grad_checkpointing}) ...")
     t0_step = time.perf_counter()
     train_output = trainer.train()
     step_duration = time.perf_counter() - t0_step
