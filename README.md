@@ -52,17 +52,33 @@ This is a DEITA-inspired approach adapted for sub-1B PEFT scale with lightweight
 
 ## Setup
 
-### Requirements
+### Cloud GPU Environment Setup (Recommended)
 
-```bash
-pip install -r requirements.txt
-```
+1. **Clone repository:**
+   ```bash
+   git clone <REPO_URL>
+   cd efficient-llm-finetuning
+   ```
 
-### Hardware Used
-- **CPU:** _(fill in after experiments)_
-- **GPU:** _(fill in — or CPU-only)_
-- **RAM:** _(fill in)_
-- **Measured runtime per experiment:** _(fill in after E1 dry run)_
+2. **Install Dependencies (CUDA-enabled):**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **Verify GPU with Smoke Test:**
+   ```bash
+   python src/gpu_smoke_test.py
+   ```
+   *This verifies CUDA detection, loads `Qwen/Qwen2.5-0.5B-Instruct`, attaches LoRA, runs 1 training step, and logs peak VRAM to `outputs/smoke_test/smoke_test_results.json`.*
+
+### Interactive Cloud Notebook
+Alternatively, open and run [`notebooks/cloud_run.ipynb`](notebooks/cloud_run.ipynb) directly in Google Colab (Free T4 or Pro A100), Kaggle, or RunPod.
+
+### Hardware Requirements
+- **GPU:** $\ge$ 6–16 GB VRAM (e.g., NVIDIA T4, RTX 3090, RTX 4090, A10G, A100, L4)
+- **Precision:** FP16 or BF16 (`torch_dtype="auto"`)
+- **Measured VRAM footprint:** ~2.5 GB to 3.5 GB peak
+- **Estimated Full Suite Runtime:** ~45–65 minutes (all 5 primary runs + 2 ablations + scoring)
 
 ---
 
