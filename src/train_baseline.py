@@ -171,6 +171,7 @@ def main():
         save_strategy=t_cfg.get("save_strategy", "epoch"),
         eval_strategy=t_cfg.get("eval_strategy", "epoch"),
         logging_steps=t_cfg.get("logging_steps", 50),
+        gradient_checkpointing=t_cfg.get("gradient_checkpointing", False),
         dataloader_num_workers=t_cfg.get("dataloader_num_workers", 0),
         report_to="none",   # no external logging; results saved to JSON
         seed=seed,
