@@ -31,7 +31,7 @@ data:
   dataset_name: "tatsu-lab/alpaca"
   max_samples: null          # null = use all 52k; set int for quick sanity runs
   eval_split_ratio: 0.05     # 5% held-out eval from the training set
-  max_seq_length: 512
+  max_seq_length: 384        # reduced from 512 — cuts activation memory ~25% on T4
   seed: 42
 
 # ── Scoring (α + β + γ = 1.0) ────────────────────────────────────────────────
@@ -42,11 +42,20 @@ scoring:
   embedding_model: "all-MiniLM-L6-v2"   # used for diversity embedding
 
 # ── Training ─────────────────────────────────────────────────────────────────
+# T4 (14.56 GB) memory budget:
+#   Model (fp16):        ~1.0 GB
+#   LoRA grads/optim:    ~0.1 GB
+#   Activations (ckpt):  ~3.5 GB  (batch=2, seq=384)
+#   lm_head logits:      ~0.2 GB  (2 × 384 × 151936 × 2B)
+#   Overhead / reserved: ~1.5 GB
+#   ─────────────────────────────
+#   Estimated peak:      ~6.3 GB  (safe margin for 14.56 GB T4)
+# Effective batch size = per_device_train_batch_size × gradient_accumulation_steps = 2 × 16 = 32
 training:
   num_train_epochs: 1
-  per_device_train_batch_size: 8
-  per_device_eval_batch_size: 8
-  gradient_accumulation_steps: 4
+  per_device_train_batch_size: 2    # was 8 — lm_head logits alone need 1.24 GB at batch=8
+  per_device_eval_batch_size: 2
+  gradient_accumulation_steps: 16   # was 4 — keeps effective batch size at 32
   gradient_checkpointing: true
   learning_rate: 2.0e-4
   lr_scheduler_type: "cosine"
@@ -54,12 +63,12 @@ training:
   weight_decay: 0.001
   fp16: true      # enabled for NVIDIA T4 Tensor Cores
   bf16: false      # set true if A100 / H100
-  optim: "adamw_torch"
+  optim: "adamw_8bit"    # was adamw_torch — 8-bit optimizer halves optimizer state memory
   save_strategy: "epoch"     # checkpoint every epoch — crash safety
   eval_strategy: "epoch"
   logging_steps: 50
   output_dir: "outputs"
-  dataloader_num_workers: 2
+  dataloader_num_workers: 0  # was 2 — avoids worker memory overhead in Colab
 
 # ── Evaluation ───────────────────────────────────────────────────────────────
 evaluation:

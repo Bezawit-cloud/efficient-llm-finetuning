@@ -16,6 +16,7 @@ The script:
   7. Saves checkpoint + results JSON (wall-clock, peak GPU mem, param counts, eval loss)
 """
 import argparse
+import gc
 import json
 import os
 import sys
@@ -119,6 +120,15 @@ def main():
 
     logger.info(f"=== Experiment {exp_id}: {exp_name} | seed={seed} ===")
     logger.info(f"Config: {args.config}")
+
+    # ── Flush any leftover GPU allocations from a previous experiment ─────────
+    import torch
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+        torch.cuda.reset_peak_memory_stats()
+        logger.info(f"GPU free at experiment start: "
+                    f"{torch.cuda.mem_get_info()[0]/1024**3:.2f} GB / "
+                    f"{torch.cuda.mem_get_info()[1]/1024**3:.2f} GB")
 
     # ── Load data ─────────────────────────────────────────────────────────────
     from src.data_utils import load_alpaca_dataset, tokenize_dataset
@@ -243,6 +253,13 @@ def main():
     for k, v in results.items():
         logger.info(f"  {k}: {v}")
     logger.info("-" * 60)
+
+    # ── Free GPU memory before the next experiment ─────────────────────────────
+    del trainer, model, tokenizer
+    gc.collect()
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+        logger.info("GPU cache cleared after experiment.")
 
 
 if __name__ == "__main__":
