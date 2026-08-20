@@ -1,9 +1,10 @@
 # Core ML
 torch>=2.1.0
 transformers>=4.40.0
-peft>=0.10.0
+peft>=0.14.0
 accelerate>=0.28.0
 bitsandbytes>=0.43.0  # optional: 4-bit quantisation fallback
+torchao>=0.16.0       # PEFT>=0.14 dispatch_torchao requires >=0.16.0
 
 # Data
 datasets>=2.19.0

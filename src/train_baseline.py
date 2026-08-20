@@ -166,7 +166,7 @@ def main():
         gradient_accumulation_steps=t_cfg["gradient_accumulation_steps"],
         learning_rate=t_cfg["learning_rate"],
         lr_scheduler_type=t_cfg["lr_scheduler_type"],
-        warmup_ratio=t_cfg["warmup_ratio"],
+        warmup_steps=t_cfg["warmup_steps"],    # transformers v5: float < 1.0 acts as ratio
         weight_decay=t_cfg["weight_decay"],
         fp16=t_cfg.get("fp16", False),
         bf16=t_cfg.get("bf16", False),
