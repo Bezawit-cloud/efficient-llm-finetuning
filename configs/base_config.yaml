@@ -42,21 +42,21 @@ scoring:
   embedding_model: "all-MiniLM-L6-v2"   # used for diversity embedding
 
 # ── Training ─────────────────────────────────────────────────────────────────
-# T4 (14.56 GB) high-throughput budget:
+# T4 (14.56 GB) safe memory budget:
 #   Model (fp16):        ~1.0 GB
 #   LoRA grads/optim:    ~0.05 GB (AdamW torch)
-#   Activations:         ~1.0 GB  (batch=16, seq=384, no ckpt)
-#   lm_head logits:      ~1.8 GB  (16 × 384 × 151936 × 2B)
+#   Activations (ckpt):  ~0.5 GB  (batch=8, seq=384, grad checkpointing)
+#   lm_head logits:      ~0.9 GB  (8 × 384 × 151936 × 2B)
 #   Overhead / reserved: ~1.5 GB
 #   ─────────────────────────────
-#   Estimated peak:      ~5.3 GB  (Safe margin for 14.56 GB T4, ~9 GB headroom)
-# Effective batch size = per_device_train_batch_size × gradient_accumulation_steps = 16 × 2 = 32
+#   Estimated peak:      ~3.9 GB  (Safe margin for 14.56 GB T4, ~10 GB headroom)
+# Effective batch size = per_device_train_batch_size × gradient_accumulation_steps = 8 × 4 = 32
 training:
   num_train_epochs: 1
-  per_device_train_batch_size: 16   # maximized for GPU Tensor Core utilization
-  per_device_eval_batch_size: 16
-  gradient_accumulation_steps: 2    # keeps effective batch size at 32
-  gradient_checkpointing: false     # disabled to eliminate 35% recomputation overhead
+  per_device_train_batch_size: 8
+  per_device_eval_batch_size: 8
+  gradient_accumulation_steps: 4
+  gradient_checkpointing: true
   learning_rate: 2.0e-4
   lr_scheduler_type: "cosine"
   warmup_steps: 0.03      # transformers v5: float < 1.0 is treated as a ratio of total steps
