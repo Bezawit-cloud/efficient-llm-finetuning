@@ -11,13 +11,13 @@ Verifies:
   7. Results persistence to outputs/smoke_test/results.json.
 """
 import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
+
 import sys
 import time
 import json
 from pathlib import Path
-
-# Set CUDA allocator configuration before any torch/CUDA calls
-os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 
 # Ensure src/ is importable
 sys.path.insert(0, str(Path(__file__).parent.parent))

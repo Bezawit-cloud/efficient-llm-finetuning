@@ -15,16 +15,16 @@ The script:
   6. Trains with HuggingFace Trainer
   7. Saves checkpoint + results JSON (wall-clock, peak GPU mem, param counts, eval loss)
 """
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
+
 import argparse
 import gc
 import json
-import os
 import sys
 import time
 from pathlib import Path
-
-# Set CUDA allocator configuration before any torch/CUDA calls
-os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 
 # Make sure src/ is importable when running from repo root
 sys.path.insert(0, str(Path(__file__).parent.parent))
