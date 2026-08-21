@@ -1,6 +1,6 @@
 # Adaptive Data Selection & Curriculum Learning for Compute-Efficient LLM Fine-Tuning
 
-> **Headline result:** In this setup, a random 50% subset of Alpaca reached eval loss within +0.011 of the full-data baseline while reducing training wall-clock time by ~51.5%. Adaptive heuristic selection and curriculum ordering provided no measurable benefit over random selection at this scale. All findings are from single-seed runs (seed 42) on Qwen2.5-0.5B-Instruct + LoRA + Alpaca (1 epoch) — see [Experimental Findings](#experimental-findings).
+> **Headline result:** In this setup, a random 50% subset of Alpaca reached eval loss within +0.0113 of the full-data baseline while reducing training wall-clock time by ~49.0%. Adaptive heuristic selection and curriculum ordering provided no measurable benefit over random selection at this scale. All findings are from single-seed runs (seed 42) on Qwen2.5-0.5B-Instruct + LoRA + Alpaca (1 epoch) — see [Experimental Findings](#experimental-findings).
 
 A research project investigating whether smart data selection + curriculum ordering can match full-dataset fine-tuning quality at half the compute cost.
 
@@ -78,7 +78,7 @@ Alternatively, open and run [`notebooks/cloud_run.ipynb`](notebooks/cloud_run.ip
 - **GPU:** $\ge$ 8 GB VRAM recommended (all experiments were run on a single NVIDIA T4)
 - **Precision:** FP16 or BF16 (`torch_dtype="auto"`)
 - **Measured peak VRAM:** ~6.9 GB across all seven runs
-- **Measured suite runtime (1× T4):** E1 ≈ 69 min; each 50% run ≈ 28–33 min; full suite (7 runs) ≈ 4 hours
+- **Measured suite runtime (1× T4):** E1 ≈ 65 min; each 50% run ≈ 28–33 min; full suite (7 runs) ≈ 4.1 hours
 
 ---
 
@@ -176,12 +176,12 @@ Values below are reproduced exactly from the validated artifacts in `outputs/**/
 
 | Exp | Selection | Ordering | Fraction | n_train | Eval Loss | Train Loss | Time (min) | Peak GPU MB | Seed |
 |-----|-----------|----------|---------:|--------:|----------:|-----------:|-----------:|------------:|-----:|
-| E1 | full | random | 1.0 | 49,401 | 1.184454 | 1.221815 | 68.62 | 6887.6 | 42 |
+| E1 | full | random | 1.0 | 49,401 | 1.184476 | 1.221839 | 65.22 | 6887.6 | 42 |
 | E2 | random | random | 0.5 | 24,700 | 1.195796 | 1.236928 | 33.26 | 6887.6 | 42 |
 | E3 | adaptive | random | 0.5 | 24,700 | 1.204629 | 1.154256 | 28.38 | 6887.5 | 42 |
 | E4 | adaptive | curriculum | 0.5 | 24,700 | 1.204174 | 1.154270 | 28.44 | 6887.5 | 42 |
 | E5 | random | curriculum | 0.5 | 24,700 | 1.195706 | 1.236344 | 33.24 | 6887.6 | 42 |
-| A1 | adaptive (α=1, diversity-only) | random | 0.5 | 24,700 | 1.204628 | 1.154256 | 28.37 | 6887.5 | 42 |
+| A1 | adaptive (α=1, diversity-only) | random | 0.5 | 24,700 | 1.204624 | 1.154256 | 28.37 | 6887.5 | 42 |
 | A2 | adaptive (β=1, complexity-only) | random | 0.5 | 24,700 | 1.204628 | 1.154260 | 28.31 | 6887.5 | 42 |
 
 Eval loss is reported at 6 decimal places here for presentation; full-precision values are stored in the result artifacts (`outputs/experiment_results.csv`, `outputs/all_results.json`, and per-experiment `results.json`). Eval loss is a held-out language-modeling metric — it is not a direct measure of generation quality (no ROUGE, win-rate, or human-preference evaluation was performed).
@@ -190,23 +190,25 @@ Eval loss is reported at 6 decimal places here for presentation; full-precision 
 
 These observations are **descriptive**: each configuration was trained once with seed 42, so differences are not significance-tested and should not be generalized beyond this exact setup (Qwen2.5-0.5B-Instruct + LoRA r=8 + Alpaca + 1 epoch + the hyperparameters above).
 
-- Random 50% selection retained performance close to the full-data baseline (eval-loss increase of +0.0113 relative to E1) while reducing training wall-clock time by approximately 51.5%.
+- Random 50% selection retained performance close to the full-data baseline (eval-loss increase of +0.0113 relative to E1) while reducing training wall-clock time by approximately 49.0%.
 - In this experimental setup, adaptive 50% selection did not outperform random 50% selection (E3 vs E2: +0.0088 eval-loss difference).
 - Curriculum ordering produced no measurable improvement for either selection strategy (E3→E4: −0.0005; E2→E5: −0.0001).
-- The diversity-only (A1) and complexity-only (A2) ablations were numerically indistinguishable from the combined adaptive configuration (differences ≈ 0.000002).
+- The diversity-only (A1) and complexity-only (A2) ablations were numerically indistinguishable from the combined adaptive configuration (differences ≈ 0.000006).
 - These findings are specific to the tested model, dataset, scoring function, and scale; they do not establish that random selection is universally preferable or that heuristic selection fails generally.
 
 ---
 
 ## Artifact Provenance & Reproducibility
 
-**Result artifacts.** The seven `outputs/**/results.json` files were reconstructed from the verified executed experiment logs and notebook outputs after the original Kaggle `/kaggle/working` artifacts were no longer directly available. They were subsequently cross-validated for exact numerical agreement against:
+**Result artifacts.** The seven canonical `outputs/**/results.json` files correspond to the executed experiment suite recorded in `notebooks/notebook623351e51a.ipynb` (all seven runs executed sequentially on the same Kaggle T4 session with seed 42). Because the original Kaggle working directory was no longer directly available, the JSON records were reconstructed from the verified notebook/log outputs; they were subsequently cross-validated for exact numerical agreement against:
 
 - `outputs/experiment_results.csv`
 - `outputs/all_results.json`
-- the executed Kaggle notebook (`notebooks/notebook623351e51a.ipynb`)
+- the executed Kaggle notebook
 
-No training was rerun to create these artifacts. They contain the verified experiment results used by all figures and analysis. `create_results.py` records how the JSONs were reconstructed.
+Two provenance corrections were applied during reconciliation with the executed notebook: (1) the canonical E1 record uses the suite-run baseline rather than an earlier standalone E1 validation run of the identical configuration; (2) the A1 record's loss values, which had collided with A2's during initial reconstruction, were corrected from the authoritative notebook output. A standalone same-configuration E1 repeat also exists (eval_loss 1.1844538450241089, 68.62 min); it is retained here as documentation of observed run-to-run variation (~0.00002 eval-loss difference between same-seed repeats) but is not part of the primary seven-experiment table. No training was rerun during artifact correction.
+
+`create_results.py` records how the JSONs were reconstructed and holds the canonical values.
 
 **Figures.** [`scripts/generate_figures.py`](scripts/generate_figures.py) generates all figures dynamically from the validated result artifacts — no metric values are hard-coded. It produces PNG + PDF versions of:
 
