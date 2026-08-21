@@ -208,6 +208,8 @@ These observations are **descriptive**: each configuration was trained once with
 
 Two provenance corrections were applied during reconciliation with the executed notebook: (1) the canonical E1 record uses the suite-run baseline rather than an earlier standalone E1 validation run of the identical configuration; (2) the A1 record's loss values, which had collided with A2's during initial reconstruction, were corrected from the authoritative notebook output. A standalone same-configuration E1 repeat also exists (eval_loss 1.1844538450241089, 68.62 min); it is retained here as documentation of observed run-to-run variation (~0.00002 eval-loss difference between same-seed repeats) but is not part of the primary seven-experiment table. No training was rerun during artifact correction.
 
+One field-level provenance limitation remains for A1: its eval_loss and train_loss are supported by the authoritative notebook output, and its wall-clock time and peak GPU memory are supported by the recorded run logs, but no authoritative `system_ram` value for A1 could be recovered from the executed notebook. The recorded A1 `system_ram` value is therefore retained from the prior artifact reconstruction and should not be treated as independently verified provenance.
+
 `create_results.py` records how the JSONs were reconstructed and holds the canonical values.
 
 **Figures.** [`scripts/generate_figures.py`](scripts/generate_figures.py) generates all figures dynamically from the validated result artifacts — no metric values are hard-coded. It produces PNG + PDF versions of:
