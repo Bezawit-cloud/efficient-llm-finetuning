@@ -1,6 +1,6 @@
 # Adaptive Data Selection & Curriculum Learning for Compute-Efficient LLM Fine-Tuning
 
-> **Headline result (TBD after experiments):** _X%_ of full-dataset performance using 50% of the data and _Y%_ less training time than random selection alone.
+> **Headline result:** In this setup, a random 50% subset of Alpaca reached eval loss within +0.011 of the full-data baseline while reducing training wall-clock time by ~51.5%. Adaptive heuristic selection and curriculum ordering provided no measurable benefit over random selection at this scale. All findings are from single-seed runs (seed 42) on Qwen2.5-0.5B-Instruct + LoRA + Alpaca (1 epoch) — see [Experimental Findings](#experimental-findings).
 
 A research project investigating whether smart data selection + curriculum ordering can match full-dataset fine-tuning quality at half the compute cost.
 
@@ -8,7 +8,7 @@ A research project investigating whether smart data selection + curriculum order
 
 ## Research Question
 
-*Does combining representativeness-based data selection with difficulty-ordered curriculum learning recover ≥X% of full-dataset instruction-following performance using only 50% of the training data — and does ordering add benefit beyond selection alone?*
+*Does combining representativeness-based data selection with difficulty-ordered curriculum learning recover full-dataset instruction-tuning performance (measured by held-out eval loss) using only 50% of the training data — and does ordering add benefit beyond selection alone?* *(Answered for this setup: random 50% came within +0.011 eval loss of the full baseline; see Experimental Findings.)*
 
 ---
 
@@ -75,10 +75,10 @@ This is a DEITA-inspired approach adapted for sub-1B PEFT scale with lightweight
 Alternatively, open and run [`notebooks/cloud_run.ipynb`](notebooks/cloud_run.ipynb) directly in Google Colab (Free T4 or Pro A100), Kaggle, or RunPod.
 
 ### Hardware Requirements
-- **GPU:** $\ge$ 6–16 GB VRAM (e.g., NVIDIA T4, RTX 3090, RTX 4090, A10G, A100, L4)
+- **GPU:** $\ge$ 8 GB VRAM recommended (all experiments were run on a single NVIDIA T4)
 - **Precision:** FP16 or BF16 (`torch_dtype="auto"`)
-- **Measured VRAM footprint:** ~2.5 GB to 3.5 GB peak
-- **Estimated Full Suite Runtime:** ~45–65 minutes (all 5 primary runs + 2 ablations + scoring)
+- **Measured peak VRAM:** ~6.9 GB across all seven runs
+- **Measured suite runtime (1× T4):** E1 ≈ 69 min; each 50% run ≈ 28–33 min; full suite (7 runs) ≈ 4 hours
 
 ---
 
@@ -139,10 +139,13 @@ efficient-llm-finetuning/
 │   ├── select_and_order.py # Data selection + curriculum ordering
 │   ├── data_utils.py       # Alpaca dataset loading + tokenization
 │   └── utils.py            # Config loading, logging, timing, results saving
+├── scripts/
+│   └── generate_figures.py # Generates all figures from outputs/**/results.json
 ├── data/
 │   └── scored_alpaca.json  # Cached importance scores (generated on first run)
-├── outputs/                # Checkpoints + results.json per experiment
-├── figures/                # Generated plots
+├── outputs/                # results.json per experiment + experiment_results.csv + all_results.json
+├── figures/                # Generated plots (PNG + PDF)
+├── notebooks/              # cloud_run.ipynb (orchestration) + executed Kaggle notebook
 ├── paper/                  # Paper draft
 └── requirements.txt
 ```
@@ -158,23 +161,68 @@ efficient-llm-finetuning/
 | LoRA alpha | 16 |
 | Target modules | q, k, v, o, gate, up, down proj |
 | Learning rate | 2e-4 |
-| Epochs | 3 |
-| Batch size | 4 (+ 4 grad accum steps = effective 16) |
-| Max seq length | 512 |
+| Epochs | 1 |
+| Batch size | 8 (+ 4 grad accum steps = effective 32) |
+| Max seq length | 384 |
 | Seed | 42 |
-| Dataset | tatsu-lab/alpaca (52k examples) |
+| Dataset | tatsu-lab/alpaca (52k examples; 49,401 train / 2,601 held-out eval) |
 
 ---
 
-## Results (populated after experiments)
+## Results
 
-| Exp | Data % | Ordering | Eval Loss | Train Time (min) | Peak GPU Mem (MB) |
-|-----|--------|----------|-----------|-----------------|-------------------|
-| E1  | 100%   | random   | TBD       | TBD             | TBD               |
-| E2  | 50%    | random   | TBD       | TBD             | TBD               |
-| E3  | 50%    | random   | TBD       | TBD             | TBD               |
-| E4  | 50%    | curriculum | TBD     | TBD             | TBD               |
-| E5  | 50%    | curriculum | TBD     | TBD             | TBD               |
+All seven experiments completed on a single NVIDIA T4 (Kaggle), seed 42.
+Values below are reproduced exactly from the validated artifacts in `outputs/**/results.json`.
+
+| Exp | Selection | Ordering | Fraction | n_train | Eval Loss | Train Loss | Time (min) | Peak GPU MB | Seed |
+|-----|-----------|----------|---------:|--------:|----------:|-----------:|-----------:|------------:|-----:|
+| E1 | full | random | 1.0 | 49,401 | 1.184454 | 1.221815 | 68.62 | 6887.6 | 42 |
+| E2 | random | random | 0.5 | 24,700 | 1.195796 | 1.236928 | 33.26 | 6887.6 | 42 |
+| E3 | adaptive | random | 0.5 | 24,700 | 1.204629 | 1.154256 | 28.38 | 6887.5 | 42 |
+| E4 | adaptive | curriculum | 0.5 | 24,700 | 1.204174 | 1.154270 | 28.44 | 6887.5 | 42 |
+| E5 | random | curriculum | 0.5 | 24,700 | 1.195706 | 1.236344 | 33.24 | 6887.6 | 42 |
+| A1 | adaptive (α=1, diversity-only) | random | 0.5 | 24,700 | 1.204628 | 1.154256 | 28.37 | 6887.5 | 42 |
+| A2 | adaptive (β=1, complexity-only) | random | 0.5 | 24,700 | 1.204628 | 1.154260 | 28.31 | 6887.5 | 42 |
+
+Eval loss is reported at 6 decimal places here for presentation; full-precision values are stored in the result artifacts (`outputs/experiment_results.csv`, `outputs/all_results.json`, and per-experiment `results.json`). Eval loss is a held-out language-modeling metric — it is not a direct measure of generation quality (no ROUGE, win-rate, or human-preference evaluation was performed).
+
+### Experimental Findings
+
+These observations are **descriptive**: each configuration was trained once with seed 42, so differences are not significance-tested and should not be generalized beyond this exact setup (Qwen2.5-0.5B-Instruct + LoRA r=8 + Alpaca + 1 epoch + the hyperparameters above).
+
+- Random 50% selection retained performance close to the full-data baseline (eval-loss increase of +0.0113 relative to E1) while reducing training wall-clock time by approximately 51.5%.
+- In this experimental setup, adaptive 50% selection did not outperform random 50% selection (E3 vs E2: +0.0088 eval-loss difference).
+- Curriculum ordering produced no measurable improvement for either selection strategy (E3→E4: −0.0005; E2→E5: −0.0001).
+- The diversity-only (A1) and complexity-only (A2) ablations were numerically indistinguishable from the combined adaptive configuration (differences ≈ 0.000002).
+- These findings are specific to the tested model, dataset, scoring function, and scale; they do not establish that random selection is universally preferable or that heuristic selection fails generally.
+
+---
+
+## Artifact Provenance & Reproducibility
+
+**Result artifacts.** The seven `outputs/**/results.json` files were reconstructed from the verified executed experiment logs and notebook outputs after the original Kaggle `/kaggle/working` artifacts were no longer directly available. They were subsequently cross-validated for exact numerical agreement against:
+
+- `outputs/experiment_results.csv`
+- `outputs/all_results.json`
+- the executed Kaggle notebook (`notebooks/notebook623351e51a.ipynb`)
+
+No training was rerun to create these artifacts. They contain the verified experiment results used by all figures and analysis. `create_results.py` records how the JSONs were reconstructed.
+
+**Figures.** [`scripts/generate_figures.py`](scripts/generate_figures.py) generates all figures dynamically from the validated result artifacts — no metric values are hard-coded. It produces PNG + PDF versions of:
+
+- `figures/fig1_eval_loss_comparison`
+- `figures/fig2_eval_loss_vs_time`
+- `figures/fig3_data_fraction_vs_eval_loss`
+- `figures/fig4_curriculum_comparison`
+- `figures/fig5_adaptive_selection_ablation`
+
+Run it from the repository root with any Python environment that has matplotlib installed (it reads only `outputs/**/results.json` and writes only to `figures/`):
+
+```bash
+python scripts/generate_figures.py
+```
+
+**Notebook limitation.** The executed Kaggle notebook (`notebooks/notebook623351e51a.ipynb`) contains Kaggle-specific absolute `/kaggle/working/...` paths in its results-compilation step and therefore is not guaranteed to run outside Kaggle without path adaptation. [`notebooks/cloud_run.ipynb`](notebooks/cloud_run.ipynb) is the portable orchestration notebook for re-running the experiment suite on Kaggle.
 
 ---
 
