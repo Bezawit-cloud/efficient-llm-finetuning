@@ -19,12 +19,11 @@ venv.bak/
 
 # Data caches and raw datasets (preserves reproducibility via code)
 data/
-data/*.json
 data/scored_alpaca.json
 !data/.gitkeep
 
 # Checkpoint weights and model binaries (keeps repository lightweight)
-outputs/
+
 outputs/**/checkpoint-*/
 outputs/**/*.safetensors
 outputs/**/*.bin
