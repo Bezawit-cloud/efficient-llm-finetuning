@@ -1,0 +1,31 @@
+{
+  "experiment_id": "E3",
+  "experiment_name": "adaptive50_random_order",
+  "config_path": "configs/exp3_adaptive50_random.yaml",
+  "seed": 42,
+  "n_train_examples": 24700,
+  "n_eval_examples": 2601,
+  "data_fraction": 0.5,
+  "selection_method": "adaptive",
+  "ordering": "random",
+  "wall_clock_seconds": 1703.05,
+  "wall_clock_minutes": 28.38,
+  "peak_gpu_memory_mb": 6887.5,
+  "system_ram": {
+    "used_mb": 2818.7,
+    "total_mb": 32100.1,
+    "percent": 10.3
+  },
+  "trainable_params": 4399104,
+  "total_params": 498431872,
+  "trainable_pct": 0.8826,
+  "eval_loss": 1.2046293020248413,
+  "eval_runtime": 63.4395,
+  "eval_samples_per_second": 41.0,
+  "eval_steps_per_second": 5.139,
+  "epoch": 1.0,
+  "train_loss": 1.1542563734894589,
+  "train_runtime": 1703.05,
+  "train_samples_per_second": 14.5,
+  "train_steps_per_second": 0.453
+}

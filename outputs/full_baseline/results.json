@@ -1,0 +1,31 @@
+{
+  "experiment_id": "E1",
+  "experiment_name": "full_baseline",
+  "config_path": "configs/exp1_baseline.yaml",
+  "seed": 42,
+  "n_train_examples": 49401,
+  "n_eval_examples": 2601,
+  "data_fraction": 1.0,
+  "selection_method": "full",
+  "ordering": "random",
+  "wall_clock_seconds": 4116.97,
+  "wall_clock_minutes": 68.62,
+  "peak_gpu_memory_mb": 6887.6,
+  "system_ram": {
+    "used_mb": 3807.6,
+    "total_mb": 32100.1,
+    "percent": 13.4
+  },
+  "trainable_params": 4399104,
+  "total_params": 498431872,
+  "trainable_pct": 0.8826,
+  "eval_loss": 1.1844538450241089,
+  "eval_runtime": 69.2422,
+  "eval_samples_per_second": 37.564,
+  "eval_steps_per_second": 4.708,
+  "epoch": 1.0,
+  "train_loss": 1.2218153587894736,
+  "train_runtime": 4117,
+  "train_samples_per_second": 12,
+  "train_steps_per_second": 0.375
+}

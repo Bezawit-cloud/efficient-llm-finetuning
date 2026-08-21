@@ -1,0 +1,31 @@
+{
+  "experiment_id": "A2",
+  "experiment_name": "ablation_complexity_only",
+  "config_path": "configs/ablation_complexity_only.yaml",
+  "seed": 42,
+  "n_train_examples": 24700,
+  "n_eval_examples": 2601,
+  "data_fraction": 0.5,
+  "selection_method": "adaptive",
+  "ordering": "random",
+  "wall_clock_seconds": 1698.54,
+  "wall_clock_minutes": 28.31,
+  "peak_gpu_memory_mb": 6887.5,
+  "system_ram": {
+    "used_mb": 2855.1,
+    "total_mb": 32100.1,
+    "percent": 10.4
+  },
+  "trainable_params": 4399104,
+  "total_params": 498431872,
+  "trainable_pct": 0.8826,
+  "eval_loss": 1.2046276330947876,
+  "eval_runtime": 63.2422,
+  "eval_samples_per_second": 41.128,
+  "eval_steps_per_second": 5.155,
+  "epoch": 1.0,
+  "train_loss": 1.1542601288909122,
+  "train_runtime": 1698.54,
+  "train_samples_per_second": 14.54,
+  "train_steps_per_second": 0.455
+}

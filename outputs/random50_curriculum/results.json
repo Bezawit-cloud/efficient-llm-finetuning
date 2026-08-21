@@ -1,0 +1,31 @@
+{
+  "experiment_id": "E5",
+  "experiment_name": "random50_curriculum",
+  "config_path": "configs/exp5_random50_curriculum.yaml",
+  "seed": 42,
+  "n_train_examples": 24700,
+  "n_eval_examples": 2601,
+  "data_fraction": 0.5,
+  "selection_method": "random",
+  "ordering": "curriculum",
+  "wall_clock_seconds": 1994.3,
+  "wall_clock_minutes": 33.24,
+  "peak_gpu_memory_mb": 6887.6,
+  "system_ram": {
+    "used_mb": 2845.8,
+    "total_mb": 32100.1,
+    "percent": 10.4
+  },
+  "trainable_params": 4399104,
+  "total_params": 498431872,
+  "trainable_pct": 0.8826,
+  "eval_loss": 1.1957060098648071,
+  "eval_runtime": 63.296,
+  "eval_samples_per_second": 41.093,
+  "eval_steps_per_second": 5.15,
+  "epoch": 1.0,
+  "train_loss": 1.2363436802681247,
+  "train_runtime": 1994.3,
+  "train_samples_per_second": 12.39,
+  "train_steps_per_second": 0.387
+}

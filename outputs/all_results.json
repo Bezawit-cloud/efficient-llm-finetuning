@@ -1,0 +1,65 @@
+{
+  "E1": {
+    "eval_loss": 1.1844538450241089,
+    "train_loss": 1.2218153587894736,
+    "wall_clock_minutes": 68.62,
+    "peak_gpu_mb": 6887.6,
+    "data_frac": 1.0,
+    "selection": "full",
+    "ordering": "random"
+  },
+  "E2": {
+    "eval_loss": 1.1957964897155762,
+    "train_loss": 1.236928045440832,
+    "wall_clock_minutes": 33.26,
+    "peak_gpu_mb": 6887.6,
+    "data_frac": 0.5,
+    "selection": "random",
+    "ordering": "random"
+  },
+  "E3": {
+    "eval_loss": 1.2046293020248413,
+    "train_loss": 1.1542563734894589,
+    "wall_clock_minutes": 28.38,
+    "peak_gpu_mb": 6887.5,
+    "data_frac": 0.5,
+    "selection": "adaptive",
+    "ordering": "random"
+  },
+  "E4": {
+    "eval_loss": 1.2041741609573364,
+    "train_loss": 1.154269584102334,
+    "wall_clock_minutes": 28.44,
+    "peak_gpu_mb": 6887.5,
+    "data_frac": 0.5,
+    "selection": "adaptive",
+    "ordering": "curriculum"
+  },
+  "E5": {
+    "eval_loss": 1.1957060098648071,
+    "train_loss": 1.2363436802681247,
+    "wall_clock_minutes": 33.24,
+    "peak_gpu_mb": 6887.6,
+    "data_frac": 0.5,
+    "selection": "random",
+    "ordering": "curriculum"
+  },
+  "A1": {
+    "eval_loss": 1.2046276330947876,
+    "train_loss": 1.154256,
+    "wall_clock_minutes": 28.37,
+    "peak_gpu_mb": 6887.5,
+    "data_frac": 0.5,
+    "selection": "adaptive",
+    "ordering": "random"
+  },
+  "A2": {
+    "eval_loss": 1.2046276330947876,
+    "train_loss": 1.1542601288909122,
+    "wall_clock_minutes": 28.31,
+    "peak_gpu_mb": 6887.5,
+    "data_frac": 0.5,
+    "selection": "adaptive",
+    "ordering": "random"
+  }
+}

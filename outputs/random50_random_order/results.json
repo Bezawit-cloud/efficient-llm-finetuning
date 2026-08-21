@@ -1,0 +1,31 @@
+{
+  "experiment_id": "E2",
+  "experiment_name": "random50_random_order",
+  "config_path": "configs/exp2_random50.yaml",
+  "seed": 42,
+  "n_train_examples": 24700,
+  "n_eval_examples": 2601,
+  "data_fraction": 0.5,
+  "selection_method": "random",
+  "ordering": "random",
+  "wall_clock_seconds": 1995.79,
+  "wall_clock_minutes": 33.26,
+  "peak_gpu_memory_mb": 6887.6,
+  "system_ram": {
+    "used_mb": 3163.6,
+    "total_mb": 32100.1,
+    "percent": 11.4
+  },
+  "trainable_params": 4399104,
+  "total_params": 498431872,
+  "trainable_pct": 0.8826,
+  "eval_loss": 1.1957964897155762,
+  "eval_runtime": 63.41,
+  "eval_samples_per_second": 41.019,
+  "eval_steps_per_second": 5.141,
+  "epoch": 1.0,
+  "train_loss": 1.236928045440832,
+  "train_runtime": 1995.79,
+  "train_samples_per_second": 12.38,
+  "train_steps_per_second": 0.387
+}
