@@ -4,13 +4,11 @@
 
 **Status:** working draft (single-seed controlled study; descriptive findings only)
 
----
 
 ## 1. Abstract
 
-Fine-tuning generative language models on large instruction corpora is expensive, and data-centric methods promise comparable quality from smaller subsets. We present a controlled empirical investigation of whether lightweight heuristic data selection and static curriculum ordering can retain the benefit of full-data instruction tuning at reduced training cost in a sub-1B setting. Using Qwen2.5-0.5B-Instruct with LoRA (r=8, α=16) on the Alpaca dataset (49,401 training examples), we cross two factors — subset selection (full, uniform random 50%, adaptive top-50% by a heuristic importance score combining embedding-based diversity, instruction complexity, and response length) and ordering (random vs. static easy-to-hard curriculum) — for seven single-seed runs on one NVIDIA T4. Evaluation is held-out full-sequence language-model loss. Random 50% selection increased held-out LM loss by only +0.0113 (+0.96%) relative to full-data training while reducing measured training wall-clock time by approximately 49%. In contrast, adaptive heuristic selection performed worse than random selection at equal budget (+0.0088), and the static curriculum produced no measurable benefit in either selection condition; component ablations were indistinguishable from the combined score. Adaptive subsets showed lower training loss but higher evaluation loss, consistent with selection of easier-to-fit or distribution-shifted examples — a hypothesis-generating observation, not a proven explanation. All findings are descriptive results from one seed, model, dataset, and epoch and should not be generalized beyond this setting.
+Fine-tuning generative language models on large instruction corpora is expensive, and data-centric methods promise comparable quality from smaller subsets. We present a controlled empirical investigation of whether lightweight heuristic data selection and static curriculum ordering can retain the benefit of full-data instruction tuning at reduced training cost in a sub-1B setting. Using Qwen2.5-0.5B-Instruct with LoRA (r=8, α=16) on the Alpaca dataset (49,401 training examples), we cross two factors — subset selection (full, uniform random 50%, adaptive top-50% by a heuristic importance score combining embedding-based diversity, instruction complexity, and response length) and ordering (random vs. static easy-to-hard curriculum) — for seven single-seed runs on one NVIDIA T4. Evaluation is held-out full-sequence language-model loss. Random 50% selection increased held-out LM loss by only +0.0113 (+0.96%) relative to full-data training while reducing measured training wall-clock time by approximately 49%. In contrast, adaptive heuristic selection performed worse than random selection at equal budget (+0.0088), and the static curriculum produced no benefit distinguishable from measurement noise in either selection condition; component ablations differed from the combined score by less than the observed same-seed repeat variation (~2×10⁻⁵). Adaptive subsets showed lower training loss but higher evaluation loss, consistent with selection of easier-to-fit or distribution-shifted examples — a hypothesis-generating observation, not a proven explanation. Findings are descriptive (single seed) and specific to this setting.
 
----
 
 ## 2. Introduction
 
@@ -20,16 +18,9 @@ This question has been studied mostly at larger scales. Data-selection work such
 
 We address this gap with a controlled, scoped experiment. We fine-tune Qwen2.5-0.5B-Instruct with LoRA on Alpaca under seven conditions that cross subset selection (full data, uniform random 50%, adaptive top-50% by an interpretable heuristic importance score) with presentation order (uniform shuffle vs. static easy-to-hard curriculum). Two component ablations isolate the diversity and complexity signals of the scorer. All runs share the same seed, split, hyperparameters, hardware session, and held-out evaluation set, so observed differences are attributable to the manipulated factors within this setup.
 
-Our strongest defensible finding is an efficiency result: a uniformly random 50% subset increased held-out full-sequence language-model loss by +0.0113 (+0.96%) relative to the full corpus while reducing measured training time by approximately 49%. The proposed adaptive selection and static curriculum provided no measurable benefit over random selection in this setting. Because each cell was trained once (single seed), we report these as descriptive observations, not statistically supported conclusions.
+Our strongest defensible finding is an efficiency result: a uniformly random 50% subset increased held-out full-sequence language-model loss by +0.0113 (+0.96%) relative to the full corpus while reducing measured training time by approximately 49%. The proposed adaptive selection and static curriculum provided no benefit distinguishable from measurement noise over random selection in this setting. Each cell was trained once; conclusions are therefore descriptive.
 
-The contributions are:
-
-1. A controlled selection × ordering factorial study at sub-1B LoRA scale, using only lightweight heuristics (no LLM judges).
-2. A measured efficiency anchor point: random 50% of Alpaca retained held-out LM loss within +0.96% of full-data training while roughly halving measured wall-clock cost in this setup.
-3. A cautionary negative observation: heuristic adaptive selection and static easy-to-hard curriculum ordering did not outperform random selection here, with a train/eval loss divergence pattern that motivates future investigation.
-4. A fully documented artifact trail (executed notebook, canonical JSON results, figure-generation script) with explicitly disclosed provenance limitations.
-
----
+The contribution is deliberately modest: a controlled selection × ordering factorial pilot at sub-1B LoRA scale using lightweight, training-free heuristics. It provides (a) a measured efficiency anchor point — random 50% of Alpaca retained held-out LM loss within +0.96% of full-data training while roughly halving measured wall-clock cost in this setup — and (b) a documented cautionary negative result on heuristic adaptive selection and static easy-to-hard ordering. The complete artifact trail (executed notebook, canonical JSON results, figure-generation script), including disclosed provenance limitations, accompanies the study so that every reported number can be independently checked.
 
 ## 3. Research Questions and Hypotheses
 
@@ -49,9 +40,8 @@ This decomposes into four questions addressed by planned contrasts:
 - H3: curriculum ordering will add a small benefit on top of either selection strategy.
 - H4: no single scorer component alone will explain the combined score's behavior.
 
-Outcomes in this setting: H1 was observed to hold; H2 and H3 were not supported by the data (no measurable benefit observed); H4 was not meaningfully testable because the ablations were numerically indistinguishable from the combined score. These outcomes are descriptive for this single configuration.
+Outcomes in this setting: H1 was observed to hold; H2 and H3 were not supported by the data (no benefit distinguishable from measurement noise was observed); H4 was not meaningfully testable because the ablations differed from the combined score by less than the observed same-seed repeat variation (~2×10⁻⁵).
 
----
 
 ## 4. Related Work
 
@@ -65,7 +55,7 @@ Our scoring function is DEITA-inspired but deliberately lightweight: embedding d
 
 Curriculum learning presents examples ordered by estimated difficulty. Recent work complicates the simple easy-to-hard recipe: DUCL (Jiang et al.) argues that pure difficulty-based curricula are insufficient and combines difficulty with a per-sample utility signal [2]; EDCO (Pang et al.) adapts the order dynamically during training rather than fixing it beforehand [3]. Domain-specific studies (e.g., medical QA) find that curriculum effects depend strongly on the difficulty signal and domain, and are often modest [4].
 
-Our method is intentionally the *static*, pure-complexity baseline case of this design space. The results below are consistent with the sensitivity reported in this literature: with a shallow difficulty signal and a fixed order, no measurable benefit was observed in this setting. This does not contradict curriculum approaches that use richer or adaptive signals.
+Our method is intentionally the *static*, pure-complexity baseline case of this design space. The results below are consistent with the sensitivity reported in this literature: with a shallow difficulty signal and a fixed order, we observed no curriculum effect that could be distinguished from measurement noise in our single-seed setting. This does not contradict curriculum approaches that use richer or adaptive signals.
 
 ### 4.3 Parameter-Efficient Fine-Tuning
 
@@ -75,7 +65,6 @@ LoRA freezes pretrained weights and injects trainable low-rank matrices into att
 
 DEITA-style work establishes that complexity-, quality-, and diversity-based selection can improve instruction-tuning efficiency at 7B–13B scale, achieving near-full performance with a small fraction of the data; however, this line of work has generally not examined whether the *order* in which selected examples are presented adds further benefit beyond selection alone. Separately, the curriculum literature explores difficulty-based ordering but typically without combining it with principled data selection, and largely not at sub-1B PEFT scale. The combination — lightweight heuristic selection evaluated jointly with static ordering, isolated in a controlled factorial design at sub-1B scale — has received less attention. This paper addresses that combination directly.
 
----
 
 ## 5. Methodology
 
@@ -102,7 +91,7 @@ weights fixed a priori (uniform thirds) and never tuned against any evaluation r
 
 **Complexity C(x).** From the instruction concatenated with its input field: character length ℓ(x) and vocabulary richness v(x) (unique whitespace-delimited lowercase tokens / total tokens). Each signal is min–max normalized independently, averaged, and min–max normalized again. This is deliberately a shallow proxy responding to surface length and lexical variety.
 
-**Response-length R(x).** With r(x) the gold-response character length, R(x) = clip[0,1](1 − |minmax(log(1+r))(x) − 0.6| / 0.6): a bell-shaped reward favoring mid-range response lengths (~200–800 characters in Alpaca). The 0.6 target was chosen a priori and not tuned.
+**Response-length R(x).** With r(x) the gold-response character length, the implemented score is $R(x) = \mathrm{clip}_{[0,1]}\!\left(1 - \frac{\left|\mathrm{minmax}(\log(1+r))(x) - t\right|}{\max(t,\,1-t)}\right)$ with target $t = 0.6$ (so the denominator equals 0.6): log(1+r) is min–max normalized over the training split, the score peaks (=1) where that normalized length equals t, and it decays linearly to 0 at both normalized endpoints — i.e., at the shortest and longest responses in the split. This favors mid-range response lengths (~200–800 characters in Alpaca). The target was chosen a priori and not tuned.
 
 Scores are computed once over the training split and cached; the held-out set never participates in scoring or selection.
 
@@ -118,13 +107,12 @@ Given the selected subset: random ordering is a seeded uniform shuffle; the easy
 
 Training and evaluation use **full-sequence language-modeling loss**: token labels cover the complete rendered sequence (instruction, optional input block, response, EOS). Instruction tokens are **not** masked; the model receives cross-entropy supervision on every non-padding token, including prompts. Consequently, `eval_loss` measures how well the adapted model predicts held-out Alpaca sequences — including their instructions — under the same objective used in training. It is **not** a direct measure of instruction-following quality, fluency, factual accuracy, or generation adequacy; no generation was sampled and no generation-based metric (ROUGE/BLEU/win-rate/human judgment) was computed anywhere in this study. Because the objective and evaluation set are identical across all conditions, relative comparisons remain internally meaningful; absolute values should not be compared to studies using completion-only masking.
 
----
 
 ## 6. Experimental Setup
 
 ### 6.1 Dataset
 
-`tatsu-lab/alpaca` (52,002 examples) is loaded via Hugging Face `datasets`; a single random split (test_size = 0.05, seed = 42) yields 49,401 training and 2,601 held-out evaluation examples, shared identically by all seven runs. No deduplication, filtering, or cleaning beyond template rendering is applied. Examples are rendered into a fixed prompt template containing the instruction, optional input block, and target response.
+`tatsu-lab/alpaca` [7] (52,002 examples) is loaded via Hugging Face `datasets`; a single random split (test_size = 0.05, seed = 42) yields 49,401 training and 2,601 held-out evaluation examples, shared identically by all seven runs. No deduplication, filtering, or cleaning beyond template rendering is applied. Examples are rendered into a fixed prompt template containing the instruction, optional input block, and target response.
 
 ### 6.2 Model and Training Configuration
 
@@ -175,7 +163,6 @@ All canonical runs executed sequentially on a single NVIDIA Tesla T4 (Kaggle ses
 
 Timing comparisons are between runs on identical hardware and session type; absolute times do not extrapolate to other devices.
 
----
 
 ## 7. Results
 
@@ -202,11 +189,17 @@ All numbers below are taken exactly from the canonical artifacts (`outputs/**/re
 | E3 → E4 | curriculum on adaptive subsets | −0.0004551411 | −0.0378% |
 | E2 → E5 | curriculum on random subsets | −0.0000904799 | −0.0076% |
 
+Figure 1 visualizes held-out evaluation loss across all seven conditions, and Figure 2 plots the efficiency frontier — evaluation loss against measured wall-clock training time.
+
+![Held-out evaluation loss across all seven experimental conditions (lower is better). Colors distinguish the full-data baseline (green), uniform-random 50% subsets (blue squares), and adaptively selected 50% subsets (orange triangles); diamond markers denote the two scoring-component ablations (A1, A2). All bars are single-seed runs on identical splits and hyperparameters; differences smaller than the observed same-seed repeat variation (~2×10⁻⁵ eval loss) should not be ranked.](figures/fig1_eval_loss_comparison.png){width=95%}
+
+![Efficiency frontier: held-out evaluation loss versus measured wall-clock training time (minutes, single NVIDIA T4). Random 50% subsets (blue squares) approach full-data quality at roughly half the training cost, while adaptive 50% subsets (orange triangles) train faster still but evaluate worse than random in this setup; the full-data baseline is shown in green.](figures/fig2_eval_loss_vs_time.png){width=95%}
+
 **Observations (descriptive; n = 1 per cell):**
 
 - Halving the corpus uniformly at random increased held-out LM loss by +0.0113 (+0.96%) while reducing measured training time by ~49.0% (65.22 → 33.26 min). Random 50% retained performance close to the full-data baseline in this setup.
-- Adaptive 50% selection performed worse than uniform random 50% selection in this experimental setting (+0.0088 eval loss at equal budget). Uniform random selection was the strongest-performing 50% subset strategy among the tested conditions.
-- No measurable practical benefit from the tested static curriculum was observed in either selection condition: E3→E4 changed eval loss by −0.0005 (−0.038%) and E2→E5 by −0.0001 (−0.008%). These differences are far smaller than the selection effect and, for E2→E5, effectively at the scale of run-to-run noise discussed in §10.
+- Adaptive 50% selection performed worse than uniform random 50% selection in this experimental setting (+0.0088 eval loss at equal budget). Among the strategies tested in this pilot, uniform random selection performed best.
+- No curriculum benefit distinguishable from practical measurement resolution was observed for the tested static curriculum in either selection condition: E3→E4 changed eval loss by −0.0005 (−0.038%) and E2→E5 by −0.0001 (−0.008%). Both deltas are far smaller than the selection effect; E2→E5 sits within a few multiples of the same-seed repeat difference discussed in §10, and even the larger E3→E4 delta is below any threshold of practical significance that a single-seed design can support.
 
 A notable pattern: adaptive runs show **lower training loss** (≈1.1543) than random/full runs (≈1.2218–1.2369) despite **higher** evaluation loss. We return to this in §8.
 
@@ -226,11 +219,10 @@ Both ablations selected subsets whose training outcomes were numerically almost 
 
 Two genuine E1 executions exist (identical configuration and seed): a standalone validation run (eval loss 1.184454, 68.62 min) and the suite run reported here (1.184476, 65.22 min). The suite run is canonical because it belongs to the complete executed seven-run suite. The pair differs by ~2×10⁻⁵ eval loss; this is an **observed same-seed repeat difference**, not a formal variance estimate, and it defines the practical resolution below which numerical differences in this study should not be interpreted.
 
----
 
 ## 8. Discussion
 
-**The headline efficiency finding.** In this setup, discarding half of Alpaca uniformly at random cost +0.96% held-out LM loss and saved ~49% of measured training time. For practitioners operating in regimes similar to this one (sub-1B model, LoRA, one epoch, ~50k generic instruction examples), this is direct evidence that dataset size was not the binding constraint on held-out loss — consistent in spirit with data-quality findings at larger scales [1], obtained here with a purely random control.
+**The headline efficiency finding.** In this setup, discarding half of Alpaca uniformly at random cost +0.96% held-out LM loss and saved ~49% of measured training time. For practitioners operating in regimes similar to this one (sub-1B model, LoRA, one epoch, ~50k generic instruction examples), this data point is consistent with dataset size not being the binding constraint on held-out loss in this setting — echoing, with a purely random control at sub-1B scale, data-quality findings reported at larger scales [1]. The efficiency relationship underlying this observation is visualized in Figure 2.
 
 **The negative results, stated cautiously.** The hypothesized benefits of adaptive selection (H2) and static curriculum ordering (H3) were not observed: adaptive selection performed worse than random selection at equal budget, and curriculum changed eval loss by less than ±0.04% in both selection conditions. We emphasize what these statements do and do not claim. They describe one scorer, one ordering rule, one model, one dataset, and one epoch. They do not support claims that adaptive selection generally hurts performance, that random selection is universally superior, that curriculum learning does not work for LLMs, or that heuristic scoring is ineffective in general — particularly given published evidence that curriculum gains depend heavily on the difficulty signal and domain [2–4] and that stronger selection signals succeed at other scales [1].
 
@@ -245,9 +237,8 @@ Two genuine E1 executions exist (identical configuration and seed): a standalone
 
 This pattern — lower train loss with higher eval loss under score-based selection — is the study's most transferable cautionary observation and a concrete target for follow-up work (e.g., model-informed or influence-based scores, utility-weighted curricula [2], deduplicated corpora, multiple seeds).
 
-**What would strengthen or revise these conclusions?** Multi-seed replication to establish real variance; completion-masked and generation-based evaluations to check whether held-out LM loss tracks instruction-following quality; stronger scorers (including LLM-judge or influence-function scores); dynamic curricula [3]; and other models, datasets, and epochs. Until such evidence exists, the appropriate summary is: in this controlled sub-1B setting, simplicity won — random halves matched or beat scored halves on this metric in every tested contrast, and ordering added nothing observable.
+**What would strengthen or revise these conclusions?** Multi-seed replication to establish real variance; completion-masked and generation-based evaluations to check whether held-out LM loss tracks instruction-following quality; stronger scorers (including LLM-judge or influence-function scores); dynamic curricula [3]; and other models, datasets, and epochs. Until such evidence exists, the appropriate summary is: in this controlled sub-1B setting, the simplest strategy fared best among those tested — random halves matched or beat scored halves on this metric in every tested contrast in this single-seed setup, and ordering added nothing observable.
 
----
 
 ## 9. Limitations
 
@@ -268,7 +259,6 @@ This pattern — lower train loss with higher eval loss under score-based select
 15. **Variance uncharacterized.** One same-config repeat exists; a single repeat pair cannot estimate variance.
 16. **Checkpoints not retained.** Model checkpoints were intentionally not preserved; behavioral analysis beyond logged metrics is impossible post hoc.
 
----
 
 ## 10. Reproducibility
 
@@ -284,15 +274,13 @@ This pattern — lower train loss with higher eval loss under score-based select
 
 **Disclosed limitations.** (i) A1's `system_ram` value could not be independently recovered from the executed notebook and should not be treated as verified provenance (its losses, time, and GPU memory are notebook/log-supported). (ii) HF dataset and model revisions are unpinned. (iii) Exact environment versions are not locked; bit-level reproduction is not guaranteed. (iv) Run-to-run variation was not systematically characterized; the single same-config E1 repeat pair (Δ ≈ 2×10⁻⁵ eval loss) documents observed repeatability at this scale but is not a variance estimate. We therefore do not claim perfect reproducibility; we claim a documented, internally consistent, fully traceable result trail.
 
----
 
 ## 11. Conclusion
 
-We conducted a controlled, single-seed factorial study of lightweight heuristic data selection and static curriculum ordering for compute-efficient LoRA fine-tuning of a 0.5B-parameter instruction-tuned model. In this setting, uniformly random 50% subsets retained held-out full-sequence LM loss within +0.96% of full-data training while reducing measured training time by ~49%; heuristic adaptive selection performed worse than random selection at equal budget; the tested static easy-to-hard curriculum showed no measurable benefit; and scorer-component ablations were indistinguishable from the combined score at a resolution finer than the observed repeat noise.
+We conducted a controlled, single-seed factorial study of lightweight heuristic data selection and static curriculum ordering for compute-efficient LoRA fine-tuning of a 0.5B-parameter instruction-tuned model. In this setting, uniformly random 50% subsets retained held-out full-sequence LM loss within +0.96% of full-data training while reducing measured training time by ~49%; heuristic adaptive selection performed worse than random selection at equal budget; the tested static easy-to-hard curriculum showed no benefit distinguishable from measurement noise; and scorer-component ablations differed from the combined score by less than the observed same-seed repeat variation.
 
 These are descriptive findings from one seed, one model, one dataset, and one epoch. They do not establish that random selection is universally preferable or that heuristic selection fails generally. What they do provide is a cautionary, well-documented sub-1B data point: lightweight DEITA-style heuristics did not translate into measurable gains here, and the accompanying train/eval loss divergence suggests — as a hypothesis for future work — that model-blind importance scores can reward fitability over utility. We release the complete artifact trail (configs, executed notebook, canonical results, figure scripts) to make every number in this paper independently checkable.
 
----
 
 ## 12. Appendix
 
@@ -363,3 +351,8 @@ Journal of Artificial Intelligence Research 83:32, 2025. arXiv:2402.05123.
 [6] Edward J. Hu, Yelong Shen, Phillip Wallis, Zeyuan Allen-Zhu, Yuanzhi Li,
 Shean Wang, Lu Wang, and Weizhu Chen. "LoRA: Low-Rank Adaptation of
 Large Language Models," ICLR 2022. arXiv:2106.09685.
+
+[7] Rohan Taori, Ishaan Gulrajani, Tianyi Zhang, Yann Dubois, Xuechen Li,
+Carlos Guestrin, Percy Liang, and Tatsunori B. Hashimoto.
+"Stanford Alpaca: An Instruction-following LLaMA Model," 2023.
+GitHub repository: tatsu-lab/stanford_alpaca.

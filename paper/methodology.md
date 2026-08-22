@@ -70,9 +70,9 @@ This is deliberately a shallow proxy for task difficulty: it responds to surface
 
 Let $r(x)$ be the character length of the gold response. The score applies a smooth penalty to extremes on a log scale:
 
-$$R(x) = \mathrm{clip}_{[0,1]}\!\left(1 - \frac{\left|\mathrm{minmax}(\log(1+r))(x) - 0.6\right|}{0.6}\right).$$
+$$R(x) = \mathrm{clip}_{[0,1]}\!\left(1 - \frac{\left|\mathrm{minmax}(\log(1+r))(x) - t\right|}{\max(t,\,1-t)}\right), \qquad t = 0.6.$$
 
-The design intent is a bell-shaped reward peaking in the mid-range of observed response lengths (approximately 200–800 characters in Alpaca): very short responses are treated as low-information and extremely long responses as potential padding. The 0.6 target was chosen a priori from the dataset's approximate mid-range and was not tuned.
+Because $\log(1+r)$ is min–max normalized over the training split, $R$ reaches its maximum of 1 where the normalized log-length equals $t$, and decays linearly to 0 at both normalized endpoints — that is, at the shortest and longest responses in the split. At $t = 0.6$ the denominator $\max(t, 1-t)$ equals 0.6. This design favors mid-range response lengths (approximately 200–800 characters in Alpaca), treating very short responses as low-information and extremely long ones as potential padding. The target was chosen a priori from the dataset's approximate mid-range and was not tuned.
 
 ### 3.4 Combined importance score
 
