@@ -1,5 +1,7 @@
 # Lightweight Heuristic Data Selection and Static Curriculum Ordering for Compute-Efficient LoRA Fine-Tuning of a Sub-1B Language Model
 
+**Author:** Bezawit Assefa
+
 **Status:** working draft (single-seed controlled study; descriptive findings only)
 
 ---
