@@ -21,7 +21,7 @@
 
 | Paper | Method | Dataset | Main Result | Limitation (relevant to this work) |
 |---|---|---|---|---|
-| **LoRA** (Hu et al., NeurIPS 2021) | Freezes pretrained weights; injects trainable low-rank matrices (ΔW = BA) into attention layers; matrices merge at inference, no latency overhead | GLUE, various LLMs | Reduces trainable parameters by orders of magnitude while matching full fine-tuning performance | Original paper predates instruction-tuning-at-scale; we extend it into a selection + curriculum context it was not designed for |
+| **LoRA** (Hu et al., ICLR 2022) | Freezes pretrained weights; injects trainable low-rank matrices (ΔW = BA) into attention layers; matrices merge at inference, no latency overhead | GLUE, various LLMs | Reduces trainable parameters by orders of magnitude while matching full fine-tuning performance | Original paper predates instruction-tuning-at-scale; we extend it into a selection + curriculum context it was not designed for |
 
 ---
 

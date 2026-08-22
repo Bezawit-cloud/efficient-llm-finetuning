@@ -55,7 +55,7 @@ Outcomes in this setting: H1 was observed to hold; H2 and H3 were not supported 
 
 ### 4.1 Data Selection for Instruction Tuning
 
-Data-centric selection aims to identify the smallest effective training subset. DEITA (Liu et al., 2024) scores instructions on complexity, quality, and diversity using trained scorer models and selects a minimal subset: results comparable to training on 300k samples were achieved with roughly 6k (up to a reported ~100× reduction) at 7B–13B scale [1]. DEITA selects a subset but does not test whether the presentation *order* of that subset adds further benefit, and its LLM-based scorers are not necessarily feasible at sub-1B PEFT scale. Surveys of data selection for LLM instruction tuning frame the space of quality scoring, diversity/coverage, and influence-based methods [5]; we use this literature for framing rather than as experimental baselines.
+Data-centric selection aims to identify the smallest effective training subset. DEITA (Liu et al., 2024) scores instructions on complexity, quality, and diversity using trained scorer models and selects a minimal subset: performance comparable to training on all 300K pool samples was achieved with only 3K selected samples (a reported ~100× reduction), and models trained on 6K automatically selected samples performed on par with or better than open-source alignment models using over 10× more data [1]. DEITA selects a subset but does not test whether the presentation *order* of that subset adds further benefit, and its LLM-based scorers are not necessarily feasible at sub-1B PEFT scale. Surveys of data selection for LLM instruction tuning frame the space of quality scoring, diversity/coverage, and influence-based methods [5]; we use this literature for framing rather than as experimental baselines.
 
 Our scoring function is DEITA-inspired but deliberately lightweight: embedding distance, surface complexity proxies, and a response-length prior replace trained scorer models, making the pipeline feasible alongside PEFT on a single commodity GPU.
 
@@ -333,9 +333,31 @@ Peak GPU memory: 6887.5–6887.6 MB across all runs. Standalone E1 repeat (non-c
 
 *(Citation keys match the source material in `paper/related_work.md`; verify bibliographic details before submission.)*
 
-[1] Liu et al. "DEITA: An Efficient Data Selection Strategy for Instruction Tuning" (ICLR 2024).
-[2] Jiang et al. "DUCL" (AAAI 2026). *(per `paper/related_work.md`; bibliographic details to verify)*
-[3] Pang et al. "EDCO" (ICML 2026). *(per `paper/related_work.md`; bibliographic details to verify)*
-[4] Human-Inspired Learning Strategies in Medical QA (arXiv:2408.07888).
-[5] Data Selection for LLM Instruction Tuning, survey (arXiv:2402.05123).
-[6] Hu et al. "LoRA: Low-Rank Adaptation of Large Language Models" (NeurIPS 2021).
+[1] Wei Liu, Weihao Zeng, Keqing He, Yong Jiang, and Junxian He.
+"What Makes Good Data for Alignment? A Comprehensive Study of
+Automatic Data Selection in Instruction Tuning" (DEITA), ICLR 2024.
+arXiv:2312.15685.
+
+[2] Zishang Jiang, Jinyi Han, Tingyun Li, Xinyi Wang, Sihang Jiang,
+Xiaojun Meng, Jiansheng Wei, Jiaqing Liang, and Yanghua Xiao.
+"Difficulty Is Not Enough: Curriculum Learning for LLMs Fine-tuning
+Must Consider Utility" (DUCL), AAAI 2026. DOI: 10.1609/aaai.v40i37.40400.
+
+[3] Jing-Cheng Pang, Sun Liu, Chang Zhou, Xian Tang, Haichuan Ma,
+Kun Jiang, Jianlong Wang, Kai Zhang, Sijie Wu, Haoran Cai, Chenwei Wu,
+Xubin Li, and Xin Chen. "EDCO: Dynamic Curriculum Orchestration for
+Domain-specific Large Language Model Fine-tuning," ICML 2026.
+arXiv:2601.03725.
+
+[4] Yushi Yang, Andrew M. Bean, Robert McCraith, and Adam Mahdi.
+"Evaluating Fine-Tuning Efficiency of Human-Inspired Learning Strategies
+in Medical Question Answering," NeurIPS 2024 Workshop on Fine-Tuning in
+Modern Machine Learning (FITML). arXiv:2408.07888.
+
+[5] Bolin Zhang, Jiahao Wang, Qianlong Du, Jiajun Zhang, Zhiying Tu,
+and Dianhui Chu. "A Survey on Data Selection for LLM Instruction Tuning,"
+Journal of Artificial Intelligence Research 83:32, 2025. arXiv:2402.05123.
+
+[6] Edward J. Hu, Yelong Shen, Phillip Wallis, Zeyuan Allen-Zhu, Yuanzhi Li,
+Shean Wang, Lu Wang, and Weizhu Chen. "LoRA: Low-Rank Adaptation of
+Large Language Models," ICLR 2022. arXiv:2106.09685.
